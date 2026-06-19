@@ -4,6 +4,8 @@ const DEFAULT_SETTINGS = {
   template: "runner",
   player: {
     name: "번개 고양이",
+    archetype: "animal",
+    accessory: "lightning",
     color: "yellow",
     speed: 4,
     hp: 3,
@@ -11,16 +13,21 @@ const DEFAULT_SETTINGS = {
   },
   background: "forest",
   obstacle: {
+    name: "선인장",
     type: "cactus",
+    shape: "spiky",
     speed: 4,
     spawnRate: 1400,
   },
   item: {
+    name: "별",
     type: "star",
+    shape: "star",
     score: 10,
     spawnRate: 1800,
   },
   game: {
+    difficulty: "normal",
     duration: 60,
     goalScore: 100,
   },
@@ -48,16 +55,23 @@ const LIMITS = {
 
 const LABELS = [
   { path: "player.name", label: "캐릭터 이름", concept: "variable", key: "player.name" },
+  { path: "player.archetype", label: "캐릭터 종류", concept: "variable", key: "player.archetype" },
   { path: "player.color", label: "캐릭터 색", concept: "variable", key: "player.color" },
+  { path: "player.accessory", label: "캐릭터 장식", concept: "variable", key: "player.accessory" },
   { path: "player.speed", label: "캐릭터 속도", concept: "variable", key: "player.speed" },
   { path: "player.hp", label: "체력", concept: "state", key: "player.hp" },
   { path: "player.jumpPower", label: "점프 힘", concept: "variable", key: "player.jumpPower" },
   { path: "background", label: "배경", concept: "variable", key: "background" },
+  { path: "obstacle.name", label: "장애물 이름", concept: "variable", key: "obstacle.name" },
   { path: "obstacle.type", label: "장애물", concept: "loop", key: "obstacle.type" },
+  { path: "obstacle.shape", label: "장애물 모양", concept: "loop", key: "obstacle.shape" },
   { path: "obstacle.speed", label: "장애물 속도", concept: "loop", key: "obstacle.speed" },
   { path: "obstacle.spawnRate", label: "장애물 나오는 간격", concept: "loop", key: "obstacle.spawnRate" },
+  { path: "item.name", label: "아이템 이름", concept: "variable", key: "item.name" },
   { path: "item.type", label: "아이템", concept: "loop", key: "item.type" },
+  { path: "item.shape", label: "아이템 모양", concept: "loop", key: "item.shape" },
   { path: "item.spawnRate", label: "아이템 나오는 간격", concept: "loop", key: "item.spawnRate" },
+  { path: "game.difficulty", label: "난이도", concept: "condition", key: "game.difficulty" },
   { path: "game.duration", label: "게임 시간", concept: "condition", key: "game.duration" },
   { path: "game.goalScore", label: "목표 점수", concept: "condition", key: "game.goalScore" },
 ];
@@ -73,6 +87,8 @@ const DISPLAY_VALUES = {
     white: "하양",
     orange: "주황",
     pink: "분홍",
+    brown: "갈색",
+    gray: "회색",
   },
   backgrounds: {
     forest: "숲",
@@ -90,6 +106,11 @@ const DISPLAY_VALUES = {
     star: "별",
     coin: "코인",
     heart: "하트",
+  },
+  difficulty: {
+    easy: "쉬움",
+    normal: "보통",
+    hard: "어려움",
   },
   concepts: {
     variable: "변수",
@@ -147,6 +168,8 @@ const PLAYER_COLORS = {
   white: "#f8fafc",
   orange: "#fb923c",
   pink: "#f472b6",
+  brown: "#9a5b2f",
+  gray: "#6b7280",
 };
 
 const state = {
@@ -297,15 +320,15 @@ function mockAgent(prompt, settings) {
   }
 
   if (containsAny(text, ["고양이", "cat", "번개"])) {
-    changes.player = { ...changes.player, name: "번개 고양이", color: "yellow" };
+    changes.player = { ...changes.player, name: "번개 고양이", archetype: "animal", accessory: "lightning", color: "yellow" };
     reasons.push("캐릭터를 번개 고양이 느낌으로 바꾸었어요");
   }
   if (containsAny(text, ["로봇", "robot"])) {
-    changes.player = { ...changes.player, name: "파란 로봇", color: "blue" };
+    changes.player = { ...changes.player, name: "파란 로봇", archetype: "robot", accessory: "helmet", color: "blue" };
     reasons.push("캐릭터를 로봇 느낌으로 바꾸었어요");
   }
   if (containsAny(text, ["토끼", "rabbit"])) {
-    changes.player = { ...changes.player, name: "분홍 토끼", color: "pink" };
+    changes.player = { ...changes.player, name: "분홍 토끼", archetype: "animal", accessory: "ears", color: "pink" };
     reasons.push("캐릭터를 토끼 느낌으로 바꾸었어요");
   }
 
@@ -396,6 +419,8 @@ function validateChanges(changes) {
   if (changes.player) {
     next.player = {};
     if (typeof changes.player.name === "string") next.player.name = changes.player.name.slice(0, 16);
+    if (typeof changes.player.archetype === "string") next.player.archetype = changes.player.archetype.slice(0, 16);
+    if (typeof changes.player.accessory === "string") next.player.accessory = changes.player.accessory.slice(0, 16);
     if (typeof changes.player.color === "string" && DISPLAY_VALUES.colors[changes.player.color]) {
       next.player.color = changes.player.color;
     }
@@ -408,6 +433,8 @@ function validateChanges(changes) {
   }
   if (changes.obstacle) {
     next.obstacle = {};
+    if (typeof changes.obstacle.name === "string") next.obstacle.name = changes.obstacle.name.slice(0, 16);
+    if (typeof changes.obstacle.shape === "string") next.obstacle.shape = changes.obstacle.shape.slice(0, 16);
     if (typeof changes.obstacle.type === "string" && DISPLAY_VALUES.obstacles[changes.obstacle.type]) {
       next.obstacle.type = changes.obstacle.type;
     }
@@ -421,6 +448,8 @@ function validateChanges(changes) {
   }
   if (changes.item) {
     next.item = {};
+    if (typeof changes.item.name === "string") next.item.name = changes.item.name.slice(0, 16);
+    if (typeof changes.item.shape === "string") next.item.shape = changes.item.shape.slice(0, 16);
     if (typeof changes.item.type === "string" && DISPLAY_VALUES.items[changes.item.type]) {
       next.item.type = changes.item.type;
     }
@@ -432,6 +461,9 @@ function validateChanges(changes) {
   }
   if (changes.game) {
     next.game = {};
+    if (typeof changes.game.difficulty === "string" && DISPLAY_VALUES.difficulty[changes.game.difficulty]) {
+      next.game.difficulty = changes.game.difficulty;
+    }
     if (LIMITS.game.duration.includes(changes.game.duration)) next.game.duration = changes.game.duration;
     if (Number.isFinite(changes.game.goalScore)) next.game.goalScore = clamp(changes.game.goalScore, ...LIMITS.game.goalScore);
     if (Object.keys(next.game).length === 0) delete next.game;
@@ -663,6 +695,7 @@ function formatValue(path, value) {
   if (path === "player.color") return display("color", value);
   if (path === "obstacle.type") return display("obstacle", value);
   if (path === "item.type") return display("item", value);
+  if (path === "game.difficulty") return display("difficulty", value);
   if (path.includes("spawnRate")) return `${value}ms`;
   if (path === "game.duration") return `${value}초`;
   if (path === "game.goalScore") return `${value}점`;
@@ -674,6 +707,7 @@ function display(type, value) {
   if (type === "color") return DISPLAY_VALUES.colors[value] || value;
   if (type === "obstacle") return DISPLAY_VALUES.obstacles[value] || value;
   if (type === "item") return DISPLAY_VALUES.items[value] || value;
+  if (type === "difficulty") return DISPLAY_VALUES.difficulty[value] || value;
   return value;
 }
 
@@ -829,8 +863,8 @@ const game = {
 
     this.drawBackground(theme, settings.background);
     this.drawGround(theme);
-    this.items.forEach((item) => this.drawItem(item, settings.item.type));
-    this.obstacles.forEach((obstacle) => this.drawObstacle(obstacle, settings.obstacle.type));
+    this.items.forEach((item) => this.drawItem(item, settings.item));
+    this.obstacles.forEach((obstacle) => this.drawObstacle(obstacle, settings.obstacle));
     this.drawPlayer(settings.player);
     if (state.paused) this.drawPause();
   },
@@ -932,7 +966,7 @@ const game = {
     ctx.moveTo(28, 46);
     ctx.quadraticCurveTo(34, 51, 42, 46);
     ctx.stroke();
-    if (playerSettings.name.includes("고양이")) {
+    if (["ears", "lightning"].includes(playerSettings.accessory) || playerSettings.name.includes("고양이")) {
       ctx.fillStyle = color;
       ctx.beginPath();
       ctx.moveTo(14, 15);
@@ -944,13 +978,47 @@ const game = {
       ctx.lineTo(46, 0);
       ctx.lineTo(54, 18);
       ctx.fill();
-    } else if (playerSettings.name.includes("로봇")) {
+    }
+    if (playerSettings.accessory === "horns") {
+      ctx.strokeStyle = "#f8fafc";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(18, 15);
+      ctx.quadraticCurveTo(8, 1, 4, 16);
+      ctx.moveTo(48, 15);
+      ctx.quadraticCurveTo(60, 1, 62, 16);
+      ctx.stroke();
+    } else if (playerSettings.accessory === "fin") {
+      ctx.fillStyle = "#93c5fd";
+      ctx.beginPath();
+      ctx.moveTo(30, 12);
+      ctx.lineTo(42, -12);
+      ctx.lineTo(52, 16);
+      ctx.fill();
+    } else if (playerSettings.accessory === "lightning") {
+      ctx.fillStyle = "#f59e0b";
+      ctx.beginPath();
+      ctx.moveTo(50, 8);
+      ctx.lineTo(39, 35);
+      ctx.lineTo(51, 34);
+      ctx.lineTo(42, 60);
+      ctx.lineTo(64, 28);
+      ctx.lineTo(52, 29);
+      ctx.closePath();
+      ctx.fill();
+    } else if (playerSettings.name.includes("로봇") || playerSettings.archetype === "robot") {
       ctx.fillStyle = "#172033";
       ctx.fillRect(28, 0, 5, 14);
       ctx.beginPath();
       ctx.arc(30, 0, 5, 0, Math.PI * 2);
       ctx.fill();
-    } else {
+    } else if (playerSettings.accessory === "wheels" || playerSettings.archetype === "vehicle") {
+      ctx.fillStyle = "#172033";
+      ctx.beginPath();
+      ctx.arc(18, h - 5, 7, 0, Math.PI * 2);
+      ctx.arc(46, h - 5, 7, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (!["ears", "lightning", "horns", "fin"].includes(playerSettings.accessory)) {
       ctx.fillStyle = color;
       roundRect(ctx, 18, -8, 10, 26, 8);
       ctx.fill();
@@ -960,12 +1028,32 @@ const game = {
     ctx.restore();
   },
 
-  drawObstacle(obstacle, type) {
+  drawObstacle(obstacle, obstacleSettings) {
     const ctx = this.ctx;
+    const type = obstacleSettings.type;
+    const shape = obstacleSettings.shape;
     ctx.save();
     ctx.translate(obstacle.x, obstacle.y);
     ctx.fillStyle = "#0f766e";
-    if (type === "rock") {
+    if (shape === "slippery") {
+      ctx.fillStyle = "#facc15";
+      ctx.beginPath();
+      ctx.ellipse(40, obstacle.h - 18, 36, 14, -0.25, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#854d0e";
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(12, obstacle.h - 18);
+      ctx.quadraticCurveTo(35, obstacle.h - 44, 68, obstacle.h - 20);
+      ctx.stroke();
+    } else if (shape === "box") {
+      ctx.fillStyle = "#a16207";
+      roundRect(ctx, 8, obstacle.h - 64, 64, 64, 8);
+      ctx.fill();
+      ctx.strokeStyle = "#fef3c7";
+      ctx.lineWidth = 4;
+      ctx.strokeRect(18, obstacle.h - 54, 44, 44);
+    } else if (type === "rock") {
       ctx.fillStyle = "#6b7280";
       ctx.beginPath();
       ctx.moveTo(8, obstacle.h);
@@ -993,12 +1081,27 @@ const game = {
     ctx.restore();
   },
 
-  drawItem(item, type) {
+  drawItem(item, itemSettings) {
     const ctx = this.ctx;
+    const type = itemSettings.type;
+    const shape = itemSettings.shape;
     const y = item.y + Math.sin(item.float) * 8;
     ctx.save();
     ctx.translate(item.x, y);
-    if (type === "coin") {
+    if (shape === "gem") {
+      ctx.fillStyle = "#22d3ee";
+      ctx.beginPath();
+      ctx.moveTo(0, -20);
+      ctx.lineTo(18, -4);
+      ctx.lineTo(10, 20);
+      ctx.lineTo(-10, 20);
+      ctx.lineTo(-18, -4);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = "#ecfeff";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    } else if (type === "coin") {
       ctx.fillStyle = "#f59e0b";
       ctx.beginPath();
       ctx.arc(0, 0, 16, 0, Math.PI * 2);
