@@ -3,143 +3,69 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AI Agent Game Lab</title>
+    <title>AI Agent Game Lab - 만들기</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <div class="app-shell">
-      <header class="topbar">
+    <div class="creator-shell">
+      <header class="creator-topbar">
         <div class="brand-block">
           <div class="brand-mark">AG</div>
           <div>
-            <h1>AI 게임 수정 실험실</h1>
-            <p>러닝 게임 설정을 바꾸고 바로 실험해보기</p>
+            <h1>AI 게임 만들기</h1>
+            <p>AI 질문에 답하면서 나만의 러닝 게임을 먼저 정합니다.</p>
           </div>
         </div>
-        <div class="top-actions">
-          <div class="mode-pill">러닝 게임</div>
-          <button id="pauseBtn" class="icon-button" type="button" aria-label="일시정지">II</button>
-          <button id="restartBtn" class="primary-button" type="button">다시 시작</button>
-        </div>
+        <a class="text-link" href="./play.html">작업실 바로가기</a>
       </header>
 
-      <main class="workspace">
-        <section class="game-panel" aria-label="게임 화면">
-          <div class="game-header">
+      <main class="creator-main">
+        <section class="conversation-card" aria-label="게임 만들기 대화">
+          <div class="progress-row">
             <div>
-              <h2 id="gameTitle">번개 고양이의 숲 달리기</h2>
-              <p id="gameSubtitle">점프해서 장애물을 피하고 아이템을 모으세요.</p>
+              <span id="stepLabel" class="step-label">1 / 5</span>
+              <h2 id="questionTitle">캐릭터는 어떤 모습이면 좋을까요?</h2>
             </div>
-            <div class="hud-strip">
-              <span>점수 <strong id="scoreValue">0</strong></span>
-              <span>체력 <strong id="hpValue">3</strong></span>
-              <span>시간 <strong id="timeValue">60</strong></span>
-            </div>
+            <div id="stepPills" class="step-pills" aria-label="진행 단계"></div>
           </div>
-          <div class="canvas-wrap">
-            <canvas id="gameCanvas" width="960" height="540"></canvas>
-            <div id="gameOverlay" class="game-overlay hidden">
-              <strong id="overlayTitle">게임 종료</strong>
-              <span id="overlayText">다시 시작해서 다른 설정을 실험해 보세요.</span>
-            </div>
+
+          <div id="agentBubble" class="agent-bubble">
+            예시를 고르거나 직접 적어도 됩니다. 없는 답을 적으면 AI가 게임에 맞는 모양으로 바꿔줄게요.
           </div>
-          <div class="game-controls">
-            <button id="jumpBtn" class="control-button" type="button">점프</button>
-            <button id="slideBtn" class="control-button" type="button">슬라이드</button>
-            <p>키보드: Space 점프, ↓ 슬라이드</p>
+
+          <div id="choiceGrid" class="choice-grid" aria-label="선택지"></div>
+
+          <form id="creatorForm" class="creator-form">
+            <label for="customAnswer">직접 쓰기</label>
+            <div class="creator-input-row">
+              <input id="customAnswer" type="text" autocomplete="off" placeholder="예: 소, 화산, 바나나 껍질" />
+              <button class="primary-button" type="submit">답하기</button>
+            </div>
+          </form>
+
+          <div class="creator-actions">
+            <button id="backStepBtn" class="ghost-button" type="button" disabled>이전</button>
+            <button id="skipStepBtn" class="ghost-button" type="button">추천값 사용</button>
           </div>
         </section>
 
-        <aside class="side-panel">
-          <section class="variables-panel" aria-label="변수와 설정">
-            <div class="panel-heading">
-              <div>
-                <h2>변수와 설정</h2>
-                <p>AI 제안이 적용되기 전 바뀔 값을 먼저 확인합니다.</p>
-              </div>
-              <button id="resetBtn" class="ghost-button" type="button">기본값</button>
+        <aside class="draft-card" aria-label="지금까지 정한 것">
+          <div class="panel-heading">
+            <div>
+              <h2>지금까지 정한 것</h2>
+              <p>답변할 때마다 게임 설정이 채워집니다.</p>
             </div>
-
-            <div class="concept-tabs" role="tablist" aria-label="개념 필터">
-              <button class="concept-tab active" data-filter="all" type="button">전체</button>
-              <button class="concept-tab" data-filter="variable" type="button">변수</button>
-              <button class="concept-tab" data-filter="loop" type="button">반복</button>
-              <button class="concept-tab" data-filter="condition" type="button">조건</button>
-              <button class="concept-tab" data-filter="state" type="button">상태</button>
-            </div>
-
-            <div id="variableList" class="variable-list"></div>
-          </section>
-
-          <section class="chat-panel" aria-label="AI 채팅">
-            <div class="panel-heading compact">
-              <div>
-                <h2>AI에게 요청</h2>
-                <p>요청하면 변경 제안이 만들어집니다.</p>
-              </div>
-            </div>
-
-            <div id="chatMessages" class="chat-messages" aria-live="polite"></div>
-
-            <div class="prompt-chips" aria-label="요청 예시">
-              <button type="button" data-prompt="배경을 우주로 바꿔줘">우주 배경</button>
-              <button type="button" data-prompt="캐릭터를 빠르게 해줘">빠른 캐릭터</button>
-              <button type="button" data-prompt="장애물이 천천히 나오게 해줘">쉬운 장애물</button>
-              <button type="button" data-prompt="점프를 더 높게 해줘">높은 점프</button>
-            </div>
-
-            <form id="agentForm" class="agent-form">
-              <input
-                id="agentInput"
-                type="text"
-                autocomplete="off"
-                placeholder="예: 배경을 우주로 바꾸고 점프를 높게 해줘"
-              />
-              <button class="primary-button" type="submit">요청</button>
-            </form>
-
-            <div class="proposal-actions">
-              <button id="applyBtn" class="primary-button" type="button" disabled>제안 적용</button>
-              <button id="clearProposalBtn" class="ghost-button" type="button" disabled>제안 지우기</button>
-              <button id="undoBtn" class="ghost-button" type="button" disabled>되돌리기</button>
-            </div>
-          </section>
+          </div>
+          <div id="draftSummary" class="draft-summary"></div>
+          <div id="finalPanel" class="final-panel hidden">
+            <h2>게임 설정이 완성됐어요</h2>
+            <p>아래 설정으로 러닝 게임 작업실을 열 수 있습니다.</p>
+            <button id="createGameBtn" class="primary-button" type="button">게임 만들기</button>
+          </div>
         </aside>
       </main>
-
-      <section class="journal-panel" aria-label="해본 결과">
-        <div class="journal-header">
-          <div>
-            <h2>해본 결과</h2>
-            <p>AI에게 부탁한 것, 바뀐 것, 해본 느낌을 짧게 남깁니다.</p>
-          </div>
-          <button id="saveJournalBtn" class="primary-button" type="button">기록 저장</button>
-        </div>
-        <div class="journal-grid">
-          <label>
-            내가 AI에게 부탁한 것
-            <textarea id="journalPrompt" rows="3" placeholder="예: 장애물이 천천히 나오게 해달라고 했다."></textarea>
-          </label>
-          <label>
-            바뀐 것
-            <textarea id="journalChanges" rows="3" placeholder="예: 장애물 나오는 간격이 길어졌다."></textarea>
-          </label>
-          <label>
-            게임을 해보니?
-            <textarea id="journalResult" rows="3" placeholder="예: 피하기 쉬워졌지만 조금 심심했다."></textarea>
-          </label>
-          <label>
-            다음에 바꾸고 싶은 것
-            <textarea id="journalNext" rows="3" placeholder="예: 장애물 속도는 조금 빠르게 하고 싶다."></textarea>
-          </label>
-        </div>
-        <div class="history-row">
-          <h3>변경 기록</h3>
-          <div id="historyList" class="history-list"></div>
-        </div>
-      </section>
     </div>
 
-    <script src="./app.js"></script>
+    <script src="./creator.js"></script>
   </body>
 </html>
